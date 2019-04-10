@@ -1,4 +1,7 @@
-FROM java:8
+FROM amazoncorretto:11
+
+RUN yum -y install shadow-utils
+
 VOLUME /tmp
 
 ENV USER_NAME ilivalidator
