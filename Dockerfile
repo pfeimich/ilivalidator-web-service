@@ -1,3 +1,4 @@
+# oder https://hub.docker.com/r/adoptopenjdk/openjdk11
 FROM amazoncorretto:11
 
 RUN yum -y install shadow-utils
