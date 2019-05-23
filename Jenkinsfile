@@ -2,45 +2,24 @@
 
 pipeline {
     agent any
-
     stages {
-        stage('Prepare') {
-            steps {
-                echo "Checkout sources"
-                git "https://github.com/edigonzales/ilivalidator-web-service.git/"
+        stage('Build') {
+            when {
+                expression {
+                    openshift.withCluster() {
+                        return !openshift.selector('bc', 'ilivalidator-web-service').exists();
+                    }
+                }
             }
-        }
-        
-        stage('Java Build') {
             steps {
-                sh './gradlew --no-daemon clean classes'
+                script {
+                    openshift.withCluster() {
+                        openshift.withProject('test') {
+                            //openshift.newBuild("--name=ilivalidator-web-service"https://github.com/sogis/ilivalidator-web-service.git)
+                        }
+                    }
+                }
             }
-        }
-
-        stage('Test') {
-            steps {
-                sh './gradlew --no-daemon test'
-                publishHTML target: [
-                    reportName : 'Gradle Tests',
-                    reportDir:   'build/reports/tests/test', 
-                    reportFiles: 'index.html',
-                    keepAll: true,
-                    alwaysLinkToLastBuild: true,
-                    allowMissing: false
-                ]                
-            }
-        }
-
-        stage('Publish') {
-            steps {
-                sh './gradlew --no-daemon bootJar'  
-                archiveArtifacts artifacts: "build/libs/ilivalidator-web-service-*.jar", onlyIfSuccessful: true, fingerprint: true                              
-            }
-        }               
-    }
-    post {
-        always {
-            deleteDir() 
         }
     }
 }
